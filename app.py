@@ -1,4 +1,10 @@
 import streamlit as st
+from datetime import datetime
+
+row1 = st.columns([99,1], gap="small")
+column1, column2 = st.columns(2)
+column3, column4 = st.columns(2)
+
 import numpy as np
 import joblib
 
@@ -55,32 +61,50 @@ def predict_loan_approval(model, age, balance, day, duration, campaign, pdays, p
 
 model = joblib.load("model.pkl")
 
-st.title("Loan Approval Prediction")
-st.write("This is a simple loan approval prediction app. Please enter the required information in the sidebar and click the 'Predict' button to get the prediction.")
+# Title
+with row1[0]:
+    st.title("Formulir Input Data Pelanggan")
 
-result = predict_loan_approval( model,58,2143,5,261,1,-1,0,'management','married','tertiary','no','yes','no','unknown','may','unknown')
-st.write(result)
+# Pengelompokan berdasarkan jenis informasi
 
-# input
-age = st.slider("Age", 18, 100, 18)
-balance = st.slider("Balance", -10000, 100000, -10000)
-day = st.slider("Day", 1, 31, 1)
-duration = st.slider("Duration", 0, 5000, 0)
-campaign = st.slider("Campaign", 0, 60, 0)
-pdays = st.slider("Pdays", -1, 871, -1)
-previous = st.slider("Previous", 0, 275, 0)
-job = st.selectbox("Job", ["admin.", "blue-collar", "entrepreneur", "housemaid", "management", "retired", "self-employed", "services", "student", "technician", "unemployed", "unknown"])
-marital = st.selectbox("Marital", ["divorced", "married", "single"])
-education = st.selectbox("Education", ["primary", "secondary", "tertiary", "unknown"])
-default = st.selectbox("Default", ["no", "yes"])
-housing = st.selectbox("Housing", ["no", "yes"])
-loan = st.selectbox("Loan", ["no", "yes"])
-contact = st.selectbox("Contact", ["cellular", "telephone", "unknown"])
-month = st.selectbox("Month", ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])
-poutcome = st.selectbox("Poutcome", ["failure", "other", "success", "unknown"])
+# 1. Informasi Demografi
+with column1:
+    st.subheader("Informasi Demografi")
+    age = st.number_input("Usia", min_value=18, max_value=100, step=1)
+    job = st.selectbox("Pekerjaan", ['admin.', 'blue-collar', 'entrepreneur', 'housemaid',
+                                    'management', 'retired', 'self-employed', 'services',
+                                    'student', 'technician', 'unemployed', 'unknown'])
+    marital = st.selectbox("Status Perkawinan", ['married', 'single', 'divorced', 'unknown'])
+    education = st.selectbox("Pendidikan", ['primary', 'secondary', 'tertiary', 'unknown'])
 
-if st.button("Predict"):
+# 2. Informasi Keuangan
+with column2:
+    st.subheader("Informasi Keuangan")
+    balance = st.number_input("Saldo", min_value=0, step=1)
+    default = st.selectbox("Kredit Macet", ['yes', 'no'])
+    housing = st.selectbox("Pinjaman Rumah", ['yes', 'no'])
+    loan = st.selectbox("Pinjaman Pribadi", ['yes', 'no'])
+
+# 3. Informasi Kontak dan Kampanye
+with column3:
+    st.subheader("group 3.1")
+    contact = st.selectbox("Jenis Kontak", ['cellular', 'telephone', 'unknown'])
+    day = st.number_input("Hari Terakhir Dihubungi", min_value=1, max_value=31, step=1)
+    month = st.selectbox("Bulan Terakhir Dihubungi", ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
+                                                    'aug', 'sep', 'oct', 'nov', 'dec'])
+    duration = st.number_input("Durasi Kontak (detik)", min_value=0, step=1)
+with column4:
+    st.subheader("group 3.2")
+    campaign = st.number_input("Jumlah Kontak dalam Kampanye Saat Ini", min_value=1, step=1)
+    pdays = st.number_input("Hari Sejak Kontak Terakhir", min_value=-1, step=1, help="-1 jika tidak pernah dihubungi")
+    previous = st.number_input("Jumlah Kontak Sebelumnya", min_value=0, step=1)
+    poutcome = st.selectbox("Hasil Kampanye Sebelumnya", ['failure', 'nonexistent', 'success'])
+
+# Tombol untuk submit
+if st.button("Submit", type="primary", help="Klik untuk submit data"):
     result = predict_loan_approval(model, age, balance, day, duration, campaign, pdays, previous, job, marital, education, default, housing, loan, contact, month, poutcome)
-    st.write(result)
-
-    
+    st.write("Hasil Prediksi: ", result)
+    if(result == 1):
+        st.write("Pelanggan dinyatakan layak mendapatkan pinjaman")
+    else:   
+        st.write("Pelanggan dinyatakan tidak layak mendapatkan pinjaman")
